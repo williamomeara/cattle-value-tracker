@@ -17,11 +17,9 @@ const CattleValueCalculator = () => {
   const [endDate, setEndDate] = useState('');
   const [selectedCattle, setSelectedCattle] = useState(null);
 
-  // Load cattle data from JSON and localStorage
   useEffect(() => {
-    // Construct the correct URL for GitHub Pages
+    console.log('Fetching data...'); // Add this line
     const fetchUrl = `${process.env.PUBLIC_URL}/assets/farming_data.json`;
-  
     fetch(fetchUrl)
       .then(response => {
         if (!response.ok) {
@@ -30,6 +28,7 @@ const CattleValueCalculator = () => {
         return response.json();
       })
       .then(data => {
+        console.log('Data fetched:', data); // Add this line
         if (data && Array.isArray(data.cattle)) {
           setCattleData(data);
         } else {
@@ -39,12 +38,12 @@ const CattleValueCalculator = () => {
       })
       .catch(error => console.error('Error fetching the JSON data:', error));
   
-    // Load cattle list from localStorage
     const savedCattleList = localStorage.getItem('cattleList');
     if (savedCattleList) {
       setCattleList(JSON.parse(savedCattleList));
     }
   }, []);
+  
   
 
   // Save cattleList to local storage whenever it changes
