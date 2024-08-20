@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/cattle-value-tracker/static/css/main.0c6a7582.css",
+    "main.js": "/cattle-value-tracker/static/js/main.7bdade5a.js",
+    "static/js/453.2f203625.chunk.js": "/cattle-value-tracker/static/js/453.2f203625.chunk.js",
+    "index.html": "/cattle-value-tracker/index.html",
+    "main.0c6a7582.css.map": "/cattle-value-tracker/static/css/main.0c6a7582.css.map",
+    "main.7bdade5a.js.map": "/cattle-value-tracker/static/js/main.7bdade5a.js.map",
+    "453.2f203625.chunk.js.map": "/cattle-value-tracker/static/js/453.2f203625.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.0c6a7582.css",
+    "static/js/main.7bdade5a.js"
+  ]
+}
