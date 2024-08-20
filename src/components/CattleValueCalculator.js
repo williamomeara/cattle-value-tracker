@@ -19,8 +19,16 @@ const CattleValueCalculator = () => {
 
   // Load cattle data from JSON and localStorage
   useEffect(() => {
-    fetch('/assets/farming_data.json')
-      .then(response => response.json())
+    // Construct the correct URL for GitHub Pages
+    const fetchUrl = `${process.env.PUBLIC_URL}/assets/farming_data.json`;
+  
+    fetch(fetchUrl)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => {
         if (data && Array.isArray(data.cattle)) {
           setCattleData(data);
@@ -30,12 +38,14 @@ const CattleValueCalculator = () => {
         }
       })
       .catch(error => console.error('Error fetching the JSON data:', error));
-
+  
+    // Load cattle list from localStorage
     const savedCattleList = localStorage.getItem('cattleList');
     if (savedCattleList) {
       setCattleList(JSON.parse(savedCattleList));
     }
   }, []);
+  
 
   // Save cattleList to local storage whenever it changes
   useEffect(() => {
