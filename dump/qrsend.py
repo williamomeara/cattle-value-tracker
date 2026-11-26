@@ -28,15 +28,19 @@ base = os.path.basename(os.path.abspath(path))
 buf = io.BytesIO()
 n = 0
 with tarfile.open(fileobj=buf, mode="w:xz", preset=9) as t:
-    for dp, dns, fns in os.walk(path):
-        dns[:] = [d for d in dns if d not in SKIP and not d.endswith(".egg-info")]
-        for f in sorted(fns):
-            p = os.path.join(dp, f)
-            if os.path.islink(p) or (os.path.isfile(p)
-                    and os.path.getsize(p) <= MAXKB * 1024 and istext(p)):
-                t.add(p, arcname=os.path.join(base, os.path.relpath(p, path)),
-                      recursive=False)
-                n += 1
+    if os.path.isfile(path):                      # single file: pack it directly
+        t.add(path, arcname=os.path.basename(path), recursive=False)
+        n = 1
+    else:
+        for dp, dns, fns in os.walk(path):
+            dns[:] = [d for d in dns if d not in SKIP and not d.endswith(".egg-info")]
+            for f in sorted(fns):
+                p = os.path.join(dp, f)
+                if os.path.islink(p) or (os.path.isfile(p)
+                        and os.path.getsize(p) <= MAXKB * 1024 and istext(p)):
+                    t.add(p, arcname=os.path.join(base, os.path.relpath(p, path)),
+                          recursive=False)
+                    n += 1
 data = buf.getvalue()
 payload = hashlib.sha256(data).digest() + data        # same format the decoder expects
 plen = len(payload)
@@ -65,7 +69,8 @@ width:min(94vw,86vh);height:min(94vw,86vh)}
 g=document.getElementById('g'),c=document.getElementById('c');
 for(var j=0;j<PER;j++)g.appendChild(document.createElement('img'));
 var cells=g.children;
-function t(){for(var j=0;j<PER;j++){var k=f*PER+j;cells[j].src=k<F.length?F[k]:'';}
+var B='data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACwAAAAAAQABAAACAkQBADs=';
+function t(){for(var j=0;j<PER;j++){var k=f*PER+j;cells[j].src=k<F.length?F[k]:B;}
 f++;if(f>=FL){f=0;loops++;}
 c.textContent=Math.min(f*PER,F.length)+' / '+F.length+'  \\u00b7  loop '+(loops+1);
 if(loops>=2)c.innerHTML="<span id=d>\\u2713 filmed 2 full loops \\u2014 you can stop</span>";
