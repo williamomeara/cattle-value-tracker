@@ -7,7 +7,9 @@ import sys, os, io, tarfile, hashlib, struct, zlib
 import segno
 
 BS = 700       # bytes per QR; lower it (e.g. 400) if the phone can't read them
-FPS = 8        # QR codes shown per second
+FPS = 8        # flashes shown per second
+COLS = 1       # QR codes per flash across (try 2); ROWS down. 1x1 = one at a time
+ROWS = 1       # only raise these if the phone films in high resolution
 MAXKB = 1024   # skip files bigger than this (data dumps)
 OUT = "qrtape.html"
 SKIP = {".git", "node_modules", ".venv", "venv", "env", "virtualenv", "site-packages",
@@ -49,18 +51,27 @@ def symbol(seq):
 
 frames = [segno.make_qr(symbol(i), error="m", boost_error=False).png_data_uri(scale=8, border=4)
           for i in range(K)]
+PER = COLS * ROWS
+FLASHES = -(-K // PER)
 html = """<!doctype html><meta charset=utf-8><title>qrtape</title>
 <style>html,body{margin:0;height:100%%;background:#fff;font:bold 3vh sans-serif}
 #w{height:100%%;display:flex;flex-direction:column;align-items:center;justify-content:center}
-img{width:min(90vw,82vh);height:auto;image-rendering:pixelated}
+#g{display:grid;grid-template-columns:repeat(%d,1fr);gap:1.5vmin;
+width:min(94vw,86vh);height:min(94vw,86vh)}
+#g img{width:100%%;height:100%%;object-fit:contain;image-rendering:pixelated}
 #c{margin-top:1vh;color:#333}#d{color:#0a0}</style>
-<div id=w><img id=q><div id=c></div></div>
-<script>var F=%s,R=%d,i=0,loops=0,q=document.getElementById('q'),c=document.getElementById('c');
-function t(){q.src=F[i];i++;if(i>=F.length){i=0;loops++;}
-c.textContent=(i||F.length)+' / '+F.length+'  \\u00b7  loop '+(loops+1);
-if(loops>=2){c.innerHTML="<span id=d>\\u2713 filmed 2 full loops \\u2014 you can stop</span>";}
+<div id=w><div id=g></div><div id=c></div></div>
+<script>var F=%s,PER=%d,FL=%d,R=%d,f=0,loops=0,
+g=document.getElementById('g'),c=document.getElementById('c');
+for(var j=0;j<PER;j++)g.appendChild(document.createElement('img'));
+var cells=g.children;
+function t(){for(var j=0;j<PER;j++){var k=f*PER+j;cells[j].src=k<F.length?F[k]:'';}
+f++;if(f>=FL){f=0;loops++;}
+c.textContent=Math.min(f*PER,F.length)+' / '+F.length+'  \\u00b7  loop '+(loops+1);
+if(loops>=2)c.innerHTML="<span id=d>\\u2713 filmed 2 full loops \\u2014 you can stop</span>";
 }t();setInterval(t,R);</script>
-""" % (__import__("json").dumps(frames), int(1000 / FPS))
+""" % (COLS, __import__("json").dumps(frames), PER, FLASHES, int(1000 / FPS))
 open(OUT, "w").write(html)
 print("packed %d code/text files -> %s (%d QR codes); open it in a browser,\n"
-      "go fullscreen (F11 or the green button) and film ~2 full loops" % (n, OUT, K))
+      "go fullscreen (F11 or the green button) and film ~2 full loops\n"
+      "(%dx%d = %d codes per flash, %d flashes)" % (n, OUT, K, COLS, ROWS, PER, FLASHES))
